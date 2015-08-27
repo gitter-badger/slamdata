@@ -1,9 +1,15 @@
 language: node_js
 sudo: false
 node_js:
-  - 0.10
+  - 0.12.4
 install:
   - mkdir $HOME/bin
+  - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.0.6.tgz
+  - tar -zxvf mongodb-linux-x86_64-3.0.6.tgz
+  - mkdir -p $HOME/bin/mongodb
+  - cp -R -n mongodb-linux-x86_64-3.0.6/* $HOME/bin/mongodb
+  - export PATH=$HOME/bin/mongodb/bin:$PATH
+
   - wget -O $HOME/purescript.tar.gz 'https://drive.google.com/uc?export=download&id=0BzXXSTC7MXL0Y0N5VEFGU2E1T0U'
   - tar zxvf $HOME/purescript.tar.gz -C $HOME/bin purescript/psc{,i,-bundle,-docs,-publish} --strip-components=1
   - chmod a+x $HOME/bin/psc{,i,-bundle,-docs,-publish}
@@ -11,7 +17,7 @@ install:
   - npm install
   - bower install
 script:
-  - gulp less bundle
+  - gulp remote-test
 before_deploy:
 - cp -r public slamdata
 - tar cjf slamdata.tar.bz2 slamdata
@@ -28,3 +34,5 @@ deploy:
 notifications:
   slack:
     secure: EbxkmDGMm5b2K5tpFrcjEmywSzhU6TSJM6VuCzIfpZ78UWqxQ6u2bbpL5a7FYjYqLZI4U/+7p+M85o0Sj58KHgfwWtpgJn84uKvIkSHo808LU/zmCBuiY4kB4z5AnTXVVFdJ2Lx+vjaeBvZA0XNztdDAViT0QM0nTAs7T94oAW8=
+addons:
+  sauce_connect: true

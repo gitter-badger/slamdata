@@ -14,9 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -}
 
-module Test.Config where
+module Test.Config
+  ( Config(..)
+  , platformFromConfig
+  ) where
 
+import Prelude
+
+import Control.Alt ((<|>))
 import Data.StrMap
+import Data.Maybe (Maybe(..), fromMaybe)
+import qualified Data.String.Regex as R
+import qualified Test.Platform as P
 
 type Config =
   { selenium :: { browser :: String
@@ -25,7 +34,7 @@ type Config =
                  , platform :: String
                  }
   , slamdataUrl :: String
-  , notebookUrl :: String 
+  , notebookUrl :: String
   , mongodb :: { host :: String
                , port :: Int
                }
@@ -153,6 +162,27 @@ type Config =
                , nestedHeadInversed :: String
                , nested :: String
                , jtableHead :: String
-               } 
+               }
   , version :: String
   }
+
+parseSauceLabsPlatform :: String -> P.Platform
+parseSauceLabsPlatform str =
+  fromMaybe P.Unknown $
+    parseByPhrase "Windows" P.Win
+      <|> parseByPhrase "OS X" P.Mac
+      <|> parseByPhrase "Linux" P.Linux
+
+  where
+    parseByPhrase :: String -> P.Platform -> Maybe P.Platform
+    parseByPhrase phrase pform =
+      if R.test (R.regex phrase R.noFlags) str
+         then Just pform
+         else Nothing
+
+platformFromConfig :: Config -> P.Platform
+platformFromConfig config =
+  if config.sauceLabs.enabled
+     then parseSauceLabsPlatform config.sauceLabs.platform
+     else P.platform
+

@@ -5,6 +5,7 @@ exports.sauceCapabilities = function (config) {
          , accessKey: config.credentials.accessKey
          , platform: config.platform
          , browserName: config.browserName
+         , tunnelIdentifier: config.tunnelIdentifier
          };
 };
 
